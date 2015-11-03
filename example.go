@@ -2,9 +2,9 @@
 package main
 
 import (
-	"github.com/deferpanic/deferclient/deferstats"
-	//	"github.com/deferpanic/dpgorilla/middleware"
 	"github.com/Sirupsen/logrus"
+	"github.com/deferpanic/deferclient/deferstats"
+	"github.com/deferpanic/dp-logrus/middleware"
 )
 
 // How to use Logrus properly with Defer Panic client library
@@ -13,11 +13,11 @@ func main() {
 
 	go dps.CaptureStats()
 
-	log := logrus.New()
-	var err error
-	if err == nil {
-		//       log.Hooks.Add(hooker)
-	}
+	log := middleware.NewWrapper(logrus.New(), dps)
 
-	log.Println("Hello, world!")
+	log.Panicln("There is no need for panic!")
+
+	log.Panic("There is no need for panic!")
+
+	log.Panicf("%v", "There is no need for panic!")
 }
