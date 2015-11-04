@@ -10,7 +10,7 @@ type Wrapper struct {
 	dps *deferstats.Client
 }
 
-// NewDeferPanic creates a wrapper for instance of logger.
+// NewWrapper creates a wrapper for instance of logger.
 func NewWrapper(log *logrus.Logger, dps *deferstats.Client) *Wrapper {
 	return &Wrapper{log, dps}
 }
