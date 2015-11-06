@@ -3,7 +3,6 @@ dp-logrus
 [![GoDoc](https://godoc.org/github.com/deferpanic/dp-logrus?status.svg)](https://godoc.org/github.com/deferpanic/dp-logrus)
 
 Example of using Logrus framework with Defer Panic client library.
-It allows to catch all the panics that should be issued by calling Logrus methods.
 
 __example__
 
@@ -21,12 +20,17 @@ func main() {
 
 	go dps.CaptureStats()
 
-	log := middleware.NewWrapper(logrus.New(), dps)
+	log := logrus.New()
 
-	log.Panicln("There is no need for panic!")
+	hook, err := middleware.NewDPHook(dps)
+	if err == nil {
+		log.Hooks.Add(hook)
+	}
 
-	log.Panic("There is no need for panic!")
+	log.Error("Error is here!")
 
-	log.Panicf("%v", "There is no need for panic!")
+	log.Fatal("Fatal is here!")
+
+	log.Panic("Panic is here!")
 }
 ```

@@ -1,46 +1,36 @@
 package middleware
 
 import (
+	"errors"
 	"github.com/Sirupsen/logrus"
 	"github.com/deferpanic/deferclient/deferstats"
 )
 
-type Wrapper struct {
-	*logrus.Logger
+// DPHook delivers logs to an Defer Panic web service.
+type DPHook struct {
 	dps *deferstats.Client
 }
 
-// NewWrapper creates a wrapper for instance of logger.
-func NewWrapper(log *logrus.Logger, dps *deferstats.Client) *Wrapper {
-	return &Wrapper{log, dps}
+// NewDPHook creates a hook using an initialized Defer Panic client.
+func NewDPHook(dps *deferstats.Client) (*DPHook, error) {
+	if dps == nil {
+		return nil, errors.New("There is no Defer Panic client")
+	}
+	return &DPHook{dps}, nil
 }
 
-func (wrapper *Wrapper) Panicln(args ...interface{}) {
-	defer func() {
-		if err := recover(); err != nil {
-			wrapper.dps.BaseClient.PrepSync(err, 0)
-		}
-	}()
+// Fire is called when a log event is fired.
+func (hook *DPHook) Fire(entry *logrus.Entry) error {
+	hook.dps.BaseClient.PrepSync(entry.Message, 0)
 
-	wrapper.Logger.Panicln(args)
+	return nil
 }
 
-func (wrapper *Wrapper) Panic(args ...interface{}) {
-	defer func() {
-		if err := recover(); err != nil {
-			wrapper.dps.BaseClient.PrepSync(err, 0)
-		}
-	}()
-
-	wrapper.Logger.Panic(args)
-}
-
-func (wrapper *Wrapper) Panicf(format string, args ...interface{}) {
-	defer func() {
-		if err := recover(); err != nil {
-			wrapper.dps.BaseClient.PrepSync(err, 0)
-		}
-	}()
-
-	wrapper.Logger.Panicf(format, args)
+// Available logging levels.
+func (hook *DPHook) Levels() []logrus.Level {
+	return []logrus.Level{
+		logrus.PanicLevel,
+		logrus.FatalLevel,
+		logrus.ErrorLevel,
+	}
 }
